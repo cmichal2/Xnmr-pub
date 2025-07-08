@@ -1,0 +1,231 @@
+- rationalize scale of values from SOAPY receiver???
+
+- try with RX888 -> set antenna? figure out gain, etc
+- enforce minimum ticks for different kinds of events in pulse-duesdr, clean up what's there.
+- fix compiling without soapy hardware. 
+- fail better if acq doesn't find soapy hardware.
+- fix pulse-duesdr.c so that tran_table doesn't need to do much if there is no WR_B (ie only one channel transmitter).)
+
+- enforce available sw - integer multiples of DAC rate? Maybe done?
+- build hardware and test synchronization and reception code!
+- Test DAC and ALT word events.
+- check that program timings are correct
+- fft filtering option? FFT vs boxcar
+- Due sdr (and due-lime) should handle ALT devices seamlessly the same way as normal hardware devices. 
+- SDR serial numbers looked up at run time? open sdrs look for specific serial numbers?
+---
+- noisy with multiple receivers is probably totally borked.
+- collapsing rx and due events - maybe hard. would need to keep separate num_events and opcodes. Or collapse at end? Maybe not needed
+-------------------------
+- why does time_remain go negative? 
+-------------------------
+Done:
+- WHAT IS DEVICE 44? I think this was the args/myargs mix up.
+- due_bgu_interface.c includes shm_prog-duelime.h (for gradprog_t). move that to due_bgu_interface.h maybe?
+- Better error messages if things in acq go wrong?
+- sync occasionally doesn't work right? Or data goes missing, or something. - I think this was the phase underflow.
+
+--------------------------------------
+
+
+
+
+- npts and acq_npts seem to get mixed up sometimes when resaving?
+- Need to rework display code for large data sets. Its very,very slow!
+	
+
+
+- integrate from file (fix it, so it can do multiples)
+
+- SNR should go up to peak?
+
+- integrate on columns and 2d
+
+still to do:
+
+- Go through scripting functions and rationalize which buffer is used: buffp[bnum] vs buffer that is passed from.
+- array: give start and end and number of points, then fill in
+linearly or on log scale!
+
+
+- array text parameters
+- native complex data types?
+- symm data not done in fitting.
+- negative Gaussian widths not done in fitting (its an abuse anyway...)
+
+BUGS to find:
+
+- should ensure that rf amplitude gets set to zero if the pulse is turned off,
+  and turned back on for the next pulse.  
+  Ick.  Probably easiest to do this in Xnmr_preproc?
+- fractional left shift
+- left shift in 2nd dim.
+
+
+With Gtk+-2.0 can get rid of text fields for freq - should redo params
+to account for new precision and int/float specifications...
+
+- nearly done.  pulse programs must be changed:
+1) 	-replace t types in param files with f
+   	- replace GET_PARAMETER_DOUBLE with GET_PARAMETER_DOUB
+2) for ordinary 'f', 
+	-replace GET_PARAMETER_FLOAT with GET_PARAMETER_DOUB
+	-and change types from float to double.
+
+
+
+
+- in new threaded version - need to check that the signal thread is still
+  running periodically (like any time we push a start/stop button?
+  - also need to fix up startup and make sure acq gets started ok.
+Both these seem hard...
+
+- large 2d data sets can overrun the parameter string buffer
+- need to make # acquisitions be an arrayable parameter.  Ick.
+	probably easiest to make na a parameter like any other parameter
+	eg like dgain.  If so, probably smart to have a system-wide param file that
+	includes dgain, block_size and na, maybe sf1 and sf2?
+- mlockall in pulse.c doesn't do anything, and pp is left unlocked - how to fix?
+	not important - leave the pulse program as suid for now.
+	could compile pulse programs as dlls, then could drop permissions after its
+	loaded.  Seems like a lot of work for a security problem.
+- doubled params in param file should give error ?
+
+--------------------------------------
+
+
+- scales 
+- overlays
+- printing
+
+- check for memory leaks
+- should clean up variable types to use all glib types (gint, gfloat, etc.) to increase
+	consistency and portability.
+- should add some more options to Xnmr interface
+	"-dump" causes the pulse program tool kit to write copies of the pulse program to 
+		a file.  The dumping algorithm is already in the code, but can only be 
+		enabled by editing the source, uncommenting the appropriate lines and 
+		recompiling the software
+
+
+still to do in the far future (maybe?):
+
+- Processing functions should be truly modular - use a plugin architecture
+
+- modify low level hardware handling to use Linux device drivers to address the 
+ 	parallel port, possibly using the drivers parport_pc.  This will make 
+	the software more portable, although it won't elimnate the need for acq 
+	to have root permissions.  This is because Acq needs root permissions 
+	to set itself to run time priority.
+
+
+done:
+- somewhere in socket handling code, there is a memory overrun or something. When auto shimming on the 200,
+eventually, get a can't find filter file message that makes no sense!
+This was actually a bug in libspinapi! It leaked file descriptors!
+
+- some sort of flag needs to be drawn in the acq buffer.
+- fitting!
+- queueing experiments, sigh...
+- in Gtk+-2.0, old text params don't get copied correctly? (reproducability?)
+- check for oen when going to sleep to wait for ppo in noisy mode.
+- deal with shm problem - if we have a running Xnmr. then start another Xnmr 
+	without the noacq option (so it can clone from acq). Then the first
+	Xnmr quits, we can't restart until the second one exits because it
+	holds open the deleted shm.  Not sure what to do about this...
+	Seems to be fixed in newer kernels (>2.4.18?)
+- text parameters still need work, should be able to get number of digits
+  at least, and maybe they could even have arrays and units too. - Obsolete with gtk+-2
+- add/subtract interface
+- if trying to pull a number from a text parameter fails we should get some feedback - obsolete
+- crashing when close phase dialog if buffer npts has increased
+- on make new buff, we don't copy the number of acq_points
+- change order of cross correlation and first bc.
+- arrays getting badly messed up (tau in Presat_OnePulse)? ah, only if text param is empty
+- in Gtk+-2.0, change between buffers while running complains about
+  changing parameter values during acquisition.(reproducability?)
+
+- finally caught the bug where data from new acquisitions seems to go missing...
+  in buff resize, check for disp.record was > npts, should be >= npts.
+- set sf check to see if should do channel 1 or 2
+- name in window should get updated at start, not at finish
+- overlays? or at least transfer scale parameters from one buff to another.
+- display that gives the current data array size, current displayed points, etc
+- need to fix up num_acqs in saved file to reflect actual number acquired (ct)
+- integrals?
+- Last events greater than 214 s are always 214 s - fixed, test this carefully
+- Fix bug: save_as, then give it a file name that already exists.
+  problem looks like the filename isn't getting saved in the buffer for check_overwrite
+- fixed crashed on kill and clone when starting up in noacq mode
+- when there is only one acq, the dwell time getting back from the scope *still* doesn't work right.
+- added to pulse prog library startup routine that checks age of 
+pp and age of hw config files and errors if you need to recompile the pp
+- doesn't exit cleanly after some kinds of errors - I think these are mostly fixed
+- 2d processing functions
+- phase dialog should work in second dimension
+- when we "slice" need to update 2d params from buff.
+- unarray leaves param values squirrley
+- set transmitter freq
+- clone buffer from acq selection
+- S/N calc like expand ?
+- cntrl-Z in middle of acq shouldn't cause a scope live error
+- append function
+- unfound variables in pulse program should give an error?
+- export data feature
+- put data_path in lower window titlebar
+- fix up no_update stuff for text parms
+- when quitting while acq is happening, should prompt - leave running or quit
+  if you try to close acq buffer, shouldn't let you
+- put reload name in title bar
+- if array with one element, should unarray
+- put parameters into a scrollable window
+- on startup, need to initialize shared mem - see if acq still is there, see if there's
+ another Xnmr in control	
+- files created should belong to user !
+- update paths and file handling for save file
+- need a second start button without save - which sets an automatic filename and
+  automatically overwrites.
+- want global and local pulse progs.
+- now a "save" or "save as" saves processing params, but acq can't !!
+- parameters that exist should get copied to new pulse program - even if out of order
+- need to decide if killing an acq should kill it immediately - now have kill button?
+- should fix pulse programs so they can't go into infinite loops
+- fix up acq so that pprog calc goes while hardware is running and we're waiting for interrupt.
+- would like a real reset button that killed the hardware and reset the software
+- need units on parameters
+- get acquisition time automatically into pulse program = dwell*npts
+- scope reading now uses inl
+- should fix up text/double param handling - maybe allow arrays?
+- buttons on array list that don't do anything
+- need to fix file path handling for save_as
+- Reload shouldn't load in processing params
+- Reload shouldn't work while acq is in process in acq buffer
+- sometimes new windows don't get active border - when close non-active win
+- sometimes border get overwritten?  - is this from exact writes to 0?
+- add apply all to phase dialog
+- Fix scope was live error after every interrupted acq
+- need phase global/local flag per buffer (already exists kinda)
+- need to save and load process params
+- ft flag should get saved along with save and load params
+- popup reports frequencies - in slice mode anyway
+- Added zero fill and left shift processing functions
+- cleaned up num_acqs_2d / npts2 problem in save data
+- cleaned up duplicated npts1 param - variable now everywhere, and corrects
+	 itself if changed between scans
+- added sw, dwell and npts boxes to panel, sw and dwell saved in param file
+- moved reload button
+- plugged security hole so pulse programs run as user, not root
+- added --noacq mode
+
+- new version 0.9 allows for direct text parameters
+- should do a reload after acq is complete
+
+
+
+
+
+
+
+
+
+

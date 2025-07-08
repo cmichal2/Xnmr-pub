@@ -1,0 +1,16 @@
+# Parameter file for one_pulse.c
+#
+# Parameter format is <name> <type> <default> <min> <max> <step> <page> [digits] <units (for float)> \n
+# 
+
+sf1 t 55.5860021
+sf1offset f 0 -1e6 1e6 1 1000 1 -
+sf2 t 55.586
+pulse_time f 100 0 10000 0.05 1 2 u
+pulse_padding f 100 0 10000000 0.05 1 2 m
+post_trig_time f 7.5 0  1e6 1 100 2 m
+PPO_time f 1024 0 1e20 10 1000 2 m
+recovery f 0 0 1e6 10 1000 2 m
+lock_up i 0 0 1 1 1
+
+# end of parameter file

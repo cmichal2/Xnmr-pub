@@ -1,0 +1,215 @@
+For build instructions for Windows, see below.
+
+Dependencies: 
+- gtk+-2.6 at least.
+- fftw3
+- lapack
+- libusb
+- the fitting package uses the AT&T PORT routine n2f.  If you don't have it,
+  comment out the calls to n2f and ivset in buff.c and remove -lf2c and -lport in the makefile.
+  OR, get the port library from AT&T
+  (which used to be at http://www.bell-labs.com/project/PORT/) but can
+  now be found at www.netlib.org/port
+  To compile it on gentoo linux, change the makefile so F77=gfortran,
+  [ also may need  to add flags -lf2c -lm. [maybe obsolete?]]
+
+- For pulseblaster,
+  - spinapi library
+- For Soapy SDR version, need soapysdr and the appropriate driver support:
+    - Airspy-R2:
+      - libairspy (distro repo or https://github.com/airspy/airspyone_host )
+      - SoapyAirspy: https://github.com/pothosware/SoapyAirspy
+    - RX888-II
+      -libSDDCSupport.so from ExtIO_sddc: https://github.com/ik1xpv/ExtIO_sddc
+
+- Optionally: spline, splint, splin2, nrutil from numerical
+  recipes. If you don't have those, comment out #define HAVE_NR_SPLINE
+  in buff.c, and remove nrutil from the makefile.
+
+
+## clean out old, uninstall:
+rm -r /usr/share/Xnmr/filters
+
+rm /usr/share/Xnmr/include/p_signals.h
+rm /usr/share/Xnmr/include/param_utils.h
+rm /usr/share/Xnmr/include/shm_data.h 
+rm /usr/share/Xnmr/include/pulse.h
+rm /usr/share/Xnmr/include/pulse-pb.h
+rm /usr/share/Xnmr/include/pulse-duelime.h
+rm /usr/share/Xnmr/include/pulse-duesdr.h
+
+rm /usr/share/Xnmr/config/h_config.h
+rm /usr/share/Xnmr/config/h_config-pb.h
+rm /usr/share/Xnmr/config/h_config-duelime.h
+rm /usr/share/Xnmr/config/h_config-duesdr.h
+rm /usr/share/Xnmr/config/pulse_hardware.h
+rm /usr/share/Xnmr/config/pulse_hardware-pb.h
+rm /usr/share/Xnmr/config/pulse_hardware-duepp.h
+
+rm /usr/share/Xnmr/config/xnmrrc
+rm /usr/share/Xnmr/xnmr_buff_icon.png
+
+rm /usr/local/bin/xcomp
+rm /usr/local/bin/Xnmr
+rm /usr/local/bin/acq
+rm /usr/local/bin/Xnmr_preproc
+
+#rm /usr/local/lib/libxnmr.a
+rm /usr/local/lib/libxnmr.so
+
+-------------------------
+install:
+install libport.so
+install gtk+ devel package, if needed
+
+mkdir -p /usr/share/Xnmr/config
+mkdir -p /usr/share/Xnmr/include
+
+ln -s $PWD/p_signals.h /usr/share/Xnmr/include/p_signals.h
+ln -s $PWD/param_utils.h /usr/share/Xnmr/include/param_utils.h
+ln -s $PWD/shm_data.h /usr/share/Xnmr/include/shm_data.h  # duplicate ?
+ln -s $PWD/pulse.h /usr/share/Xnmr/include/pulse.h
+ln -s $PWD/pulse-pb.h /usr/share/Xnmr/include/pulse-pb.h
+ln -s $PWD/pulse-duelime.h /usr/share/Xnmr/include/pulse-duelime.h
+ln -s $PWD/pulse-duesdr.h /usr/share/Xnmr/include/pulse-duesdr.h
+
+ln -s $PWD/h_config.h /usr/share/Xnmr/config/h_config.h
+ln -s $PWD/h_config-pb.h /usr/share/Xnmr/config/h_config-pb.h
+ln -s $PWD/h_config-duelime.h /usr/share/Xnmr/config/h_config-duelime.h
+ln -s $PWD/h_config-duesdr.h /usr/share/Xnmr/config/h_config-duesdr.h
+ln -s $PWD/pulse_hardware.h /usr/share/Xnmr/config/pulse_hardware.h
+ln -s $PWD/pulse_hardware-pb.h /usr/share/Xnmr/config/pulse_hardware-pb.h
+ln -s $PWD/pulse_hardware-duepp.h /usr/share/Xnmr/config/pulse_hardware-duepp.h
+
+ln -s $PWD/xnmrrc /usr/share/Xnmr/config/xnmrrc
+ln -s $PWD/xnmr_buff_icon.png /usr/share/Xnmr/xnmr_buff_icon.png
+
+ln -s $PWD/filters /usr/share/Xnmr/filters
+
+# then compile with:
+#make -f Makefile-pp or make -f Makefile-pb make -f Makefile-duelime
+#make -f Makefile-duesdr
+###  post compile:
+
+ln -s $PWD/xcomp /usr/local/bin/xcomp
+ln -s $PWD/Xnmr /usr/local/bin/Xnmr
+ln -s $PWD/acq /usr/local/bin/acq
+ln -s $PWD/Xnmr_preproc /usr/local/bin/Xnmr_preproc
+chown root /usr/local/bin/acq
+chmod u+s /usr/local/bin/acq
+
+#ln -s $PWD/libxnmr.a /usr/local/lib/libxnmr.a
+ln -s $PWD/libxnmr.so /usr/local/lib/libxnmr.so
+/sbin/ldconfig
+
+## Xnmr_prepoc and acq are libxnmr are all quite different depending on the Makefile
+
+
+
+
+  pulse_hardware.h  in /usr/share/Xnmr/config/
+  h_config.h        
+  xnmrrc
+
+  libxnmr.a         in /usr/local/lib/
+
+  p_signals.h       in /usr/share/Xnmr/include/
+  param_utils.h
+  pulse.h
+  shm_data.h
+
+  xcomp             in /usr/local/bin/
+  Xnmr
+  acq
+
+
+  pulse programs    in /usr/share/Xnmr/prog/ or ~/Xnmr/prog/
+
+
+Other software issues:
+
+1) PP_irq (our kernel module that catches parallel port interrupts and
+gives them to user-space) must be installed.  Best to compile it and
+drop it into /lib/modules/2.x.y/misc/PP_irq.o then load it with
+'insmod PP_irq irq=x' (this is currently done in /etc/rc.d/rc.local).
+
+2) acq creates a file called /var/run/Xnmr_acq_is_running (this is
+probably insecure...) when it is actually running an experiment.  This
+is so that scripts (cron jobs!)  that might take a lot of cpu time
+won't actually run.  To make it work, scripts that cron starts need to
+be modified.  For example, in /etc/cron.weekly, makewhatis.cron starts
+with: [ -e /var/run/Xnmr_acq_is_running ] && exit 0
+which bails out if the file exists.
+
+3) For lime and soapysdr versions, you'll need to
+touch /dev/PP_irq0 (as root) or Xnmr won't think that there is
+hardware. That may need to be done after every boot.
+
+----------------------------------
+WINDOWS
+
+for mingw:
+ 1) install mingw: base, fortran, and migw32-pthreads-w32
+ 1b) set path to include C:\MINGW\bin PATH=%PATH%;c:\mingw\bin
+ 2) install gtk3 bundle. Using a gtk+3.6 (which is quite old) Get it from:
+http://www.tarnyko.net/dl/gtk.htm extract to c:\gtk
+ 3) need libport.a
+ 4) choose CYGWIN or MINGW below
+ 5) build with mingw32-make -f Makefile-win
+ 6) copy gtk libraries and schemas:
+
+these in c:\Xnmr\bin:
+libatk-1.0-0.dll
+libcairo-2.dll
+libcairo-gobject-2.dll
+libexpat-1.dll
+libffi-6.dll
+libfontconfig-1.dll
+libfreetype-6.dll
+libgdk-3-0.dll
+libgdk_pixbuf-2.0-0.dll
+libgio-2.0-0.dll
+libglib-2.0-0.dll
+libgmodule-2.0-0.dll
+libgobject-2.0-0.dll
+libgtk-3-0.dll
+libpango-1.0-0.dll
+libpangocairo-1.0-0.dll
+libpangoft2-1.0-0.dll
+libpangowin32-1.0-0.dll
+libpixman-1-0.dll
+libpng15-15.dll
+Xnmr.exe
+
+these in Xnmr\share:
+glib-2.0\gschema.dtd
+glib-2.0\gschemas.compiled
+glib-2.0\org.gtk.Demo.gschema.xml
+glib-2.0\org.gtk.Settings.ColorChooser.gschema.xml
+glib-2.0\org.gtk.Settings.FileChooser.gschema.xml
+
+and finally: c:\Xnmr\xnmr_buff_icon.png 
+
+Also good to put some pulse programs in c:\Xnmr\prog
+
+
+-----------------------------
+to switch pulse program from pulse.h to pulse-pb.h, do:
+sed -i.backup -- 's/pulse.h/pulse-pb.h/' *.x
+
+After checking that everything is ok, then can rm *.x.backup
+
+----------------
+March 2018
+
+Lime SDR hardware bits:
+To allow syncing of the limesdr timestamps to the Due:
+Install Quartus Prime Lite Edition.
+Open lms7_trx_top.bdf
+
+Search for rf_path_top
+Disconnect signal line: lte_clr_sampl_nr from the clr_smpl_nr pin.
+Add an or2 gate, connect its output to clr_smpl_nr_pin.
+One input comes from lte_clr_sampl_nr
+the other input comes from FPGA_GPIO[0]
+

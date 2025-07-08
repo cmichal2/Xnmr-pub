@@ -1,0 +1,9 @@
+# Parameter file for single_p.c
+#
+# Parameter format is <name> <type> <default> <min> <max> <step> <page> [digits]\n
+#
+
+duration_us f 100 0 1000 0.05 1 2
+
+
+# end of parameter file

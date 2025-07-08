@@ -1,0 +1,325 @@
+June 10,2001
+
+Rules for pulse programming.
+
+start with:
+
+#include "pulse.h" or pulse-pb.h
+
+have:
+main(){
+pulse_program_init(); right at the top.
+
+Then:
+do{
+   GET_PARAMETER_FLOAT (); macros
+
+   begin();
+
+Then 
+   EVENT time {label,value} {l2,v2} ... ;
+
+you can put a \ to mark a continuation line.  Next line must begin with {
+
+} while ( ready(phase_for_receiver) == P_PROGRAM_CALC);
+
+done();
+return 0;
+}
+
+
+
+a few issues.  values are always integers, with the max number of bits
+specified by the device in the h_config.h file.  Except for devices
+AMP1, AMP2, AMP3 and PHASE1, PHASE2, and PHASE3.  These are floats,
+the amplitudes should be between 0 and 1, phases can have any value,
+they get modulo 360.
+
+phase for receiver should be an integer (0,1,2,3)
+
+amplitude and phase values for the new transmitter require an extra
+pulse on the appropriate clk line to latch the values into the dacs -
+this is taken care of transparently, but there are a couple of little
+issues.  Amplitude and phase events get split into two for clocking
+purposes.  The dac values get loaded into the previous event and the
+current event, the clock toggle is set for the previous and current
+event, and then the event of interest is split into two events - one
+long one, and one a single counter cycle long.  A side effect: any
+amplitude or phase setting event is a minimum of 2 counter cycles
+long.
+
+
+logical channels selected with ch A, B, C (hardware)  1,2,3 (logical in program) 
+These channels affect the rf gate, amplitude, phase and blanking, but not the synthesizers.
+
+
+
+Calibrating transmitter phases and amplitudes:
+
+From head of pulse.c
+  A few notes on the amplitude and phase correction schemes for the new RF transmitters:
+
+  1) amplitude was easy:  collect data at different amplitude
+     settings: with _AMP = 0 to 1023. 
+     then fit it with a tanh, put the inverse in here.  no problem.
+  2) phase was not really harder...
+    a) to feed transmitter output through atten ( 40-60dB or so?) then
+     into receiver. using pulse program phase_sweep, with dwell = 25u,
+     pw1 = 50u. 
+    b) export the data - make sure the first point in the data file
+     corresponds to phase = 0
+    b) use read_phases to read them out (always reads from acq_tempexport.txt)
+    c) reverse_pairs to reverse them. - reads from stdin, use pipes:
+     < infile >outfile
+
+    presto.  the files that we look to for the phase lookups are:
+    /usr/src/Xnmr/current/correct_phaseN.txt
+    where the N is a 1 2 or 3.
+
+notes: phase_sweep starts off at -5 deg, so you'll want to left shift
+to there before exporting 
+
+December 2, 2005
+
+Support for gradient driver added.  Uses infrastructure for amp and phase 
+of rf.   Pulse progs set gradient amplitudes with {GRADX,1.0} or GRADY, or 
+GRADZ, and the value is between -1.0 and 1.0.  {GRAD_ON,1} turns on all
+three gradients.  For now, the gradients are programmed through one pair of
+pulse programmer cables that would have gone to one of the rf channels.
+Xnmr figures out at pulse program start time which rf channel this takes the
+place of, by looking at which rf channel is not selected for use with the 
+1A, 1B, 1C, 2A, 2B, 2C radio buttons.
+
+use SYNC_DSP somewhere shortly before acquisition starts to hit the sync
+on the decimation stages in the receiver.
+
+
+Differences with new spectrometer: MSL200
+
+documentation of LOOP JSR, etc? in pulse-pb.c
+BRANCH [label]
+jumps to code marked by {LABEL,label}
+LOOP [# times] {LABEL,label}
+starts a hardware loop. Need to assign a name for the END_LOOP to
+reference
+
+END_LOOP[label]
+End of hardware loop. 
+
+JSR[label]
+
+RTS
+
+STOP
+WAIT
+
+Events with labels that are jumped to by a BRANCH or JSR should not
+request synth events (FREQ, PHASE, AMP) since those events get broken
+up and placed in the previous event, which we can't do for something
+that is the target of a JSR or BRANCH. The same is true for LOOP
+events - the synth setup will only happen on the first time through
+the loop.
+
+STOP doesn't seem to work the way you'd like it to. It seems to only
+work if its the last event.  If there are events later, it doesn't stop!
+
+phase/freq/amp events get updated right at the start of the specified
+event (I think).
+
+SYNC_DSP is relaced with insert_dsp_sync();
+
+
+- AMP and PHASE of channel supplying the LO must be set to sane values
+(eg 1.0 and 0.0) when acquiring data. Sometimes its best to set both
+channels to the same frequency and use the LO from the other one...
+
+- Have required two interrupt events - one after data is finished acquiring,
+second when program is complete. With new arduino-Due based acquisition
+readout, the first of these is not needed. For compatability, it is still
+expected. Pulse programs can call: set_receiver_model_stream(), and then they
+should omit the first interrupt event. CAVEAT. At the moment (Sept 2015) this
+seems to add extra noise - needs to be investigated.
+
+- noisy mode revamped and working! Pulse programs can call
+pprog_is_noisy().  When that's done, the program should generate no
+interrupts. In this mode, the program should generate
+block_size+dummy_scans sets of data (or num_acqs+dummy_scans if
+block_size is 0). dummy_scans get run at the start of each block.
+newnoisy.x is a decent example. Works up to 4k sequence lengths!
+Could maybe get longer. The AD9984 synths support single line phase or
+frequency switching.  Could use it!
+
+Gradients with BGU-II
+---------------------
+
+call init_bgu(alpha,beta,gamma) after begin().
+
+Then use SET_GRAD[x,y,z] {device,value};
+
+(which internally calls set_gradients(x,y,z) to set the gradients)
+
+Finally clear_bgu() when you're done with it.
+
+alpha, beta, gamma will be Euler angles to transform the orientation
+of x, y, z. They implement Goldstein's Euler angles in Eq's 4-43 to
+4-45 (2nd edition). We first rotate about z axis by alpha, then about
+the x axis by beta, finally about the z axis by gamma. alpha, beta,
+gamma measured in degrees.
+
+Each SET_GRAD event presently lasts 1.65 us: 1.45 us for write_bgu_raw
+and then .2us to hit NGI. This could probably be shortened quite a
+bit. 
+
+init_bgu is 6 us of pulse programmer time.
+
+and clear_bgu is 6.4us
+
+There are several safety features. The idea is that even if you have
+all the channel assignments wrong, the BGU will still do the right
+thing, even though your rf won't work.
+
+If you do start up the bgu and you hit the KILL button in the middle
+of a sequence, the bgu should get shut off.
+
+Its not (presently) possible to set just one gradient - we always set all three.
+
+To set the scale factors for the individual gradients, add a line:
+#define BGU_SCALE_FACTORS // 1.00 0.977 0.966
+into h_config.h
+The values here were found on the SGI that came with the Bruker.
+
+Dec 15, 2017.
+Start to work on LimeSDR integration.
+Plan is:
+
+call something like:
+tx_init(channel, freq, nco_freq, attn)
+rx_init(channel, sw, gain) // gain goes up to 70.
+
+for each transmitter/receiver we plan to use do this once, before begin
+(I think?)
+
+Then during sequence, have events like:
+EVENT time {TX1,amp,phase}
+to produce pulses.
+Can also do:
+
+set_offset(channel,offset_freq); which takes effect at the current
+time.
+
+When offset_freq gets back to 0, the phases all match what they were
+before.
+
+
+for receiving:
+EVENT time {RX1,phase}
+
+can also do:
+EVENT time {RX1,phase} {RX2,phase}
+
+The two receivers can have different sw's. The total npts in Xnmr gui
+must match the sum of all points received - or it must at least be big
+enough to hold them all. Take sw and dwell from gui to be for first
+receiver.
+
+Some subtleties for channel switching. Want to be able to use gui to
+swap channels - so TX1, RX1, offset freqs swap with
+channel selection. Frequency settings and initial gain settings don't
+swap though!
+
+For now, don't try to allow change of gains during sequence.
+
+
+
+////////////////////////
+Differences with new spectrometer: LimeSDR and Duepp
+
+tx_init, rx_init?
+
+documentation of LOOP JSR,
+LOOP [# times] <time> <device, value pairs>
+starts a hardware loop. Unlike PB version, no label required.
+
+END_LOOP  <time> <device, value pairs>
+End of hardware loop. 
+
+JSR[label]  <time> <device, value pairs> - label is the name of the subroutine
+
+SUBSTART[label]  <time> <device, value pairs>- label is the name of the subroutine.
+RTS  <time> <device, value pairs>
+
+EXIT <time> end of program
+
+These last two are not really implemented yet - they will lose sync
+with the LimeSDR
+WAIT
+WAIT_MAX
+
+
+Also still to do are DAC output ans alternate port output.
+
+////////////////////
+
+SVDfit for baseline:
+
+basic idea, assuming no group-delay ring-up is considered:
+- Left shift away points as needed
+- FT, do 0 and correct first order phase.
+- use the integrate function to define the region to be ignored
+[ this should be better, should be able to pick multiple regions]
+- Do the svd.
+
+If there is a group delay, its not totally clear what should work.
+It appears as though this works:
+- do ft
+- do zero order phase correct only, try to to as good a job as
+possible, emphasizing the bigger peaks
+- ft back to time domain.
+- flip the ring-up.
+- ft,
+- do correct 1st and 0 order phase.
+- use integrate to define region
+- do the svd.
+
+
+Group Delay, processing:
+
+Modifies several processing functions to account for filter ring-up.
+When doing FT's, a first order phase shift is inserted/removed after/before the FT.
+For line broadening, the apodization function goes up during the filter ring-up, then down afterwards.
+
+The second baseline correct skips over the group-delay part - not totally clear if that's what's best.
+
+
+
+June 2025.
+For soapy/sdr + Due version, pulse program is much like lime/due
+version, except rx_init takes channel number, sw, gain, and phase as
+arguments.
+
+in program {RX1,1} or {RX1,0} is receiver on or off - quite different
+from lime version.
+
+
+Noisy version requires that the receiver stays on during the entire
+loop.
+
+I think with the duesdr version, setup_synths should get called by the
+pre-built startup program - we need to set those frequencies in there
+before the users first program runs.
+
+Support for writing to Due dacs and Due alt word. Somewhat limited...
+Use: {DACA1, val} {DACA2,val} {DACB1, val} {DACB2, val}
+also: ALTA, ALTB, ALT1, ALT2 (ALT1 and 2 follow channel select
+buttons).
+
+Any time any dac is written, all dacs are written - but old values for
+the ones you didn't write should be remembered.
+Same for alt - if you write an alt word, all are written. There is no
+concept of separate devices in the alt words (yet?).
+
+
+
+The due pulse programmer firmware needs to know a little about the
+hardware config - if any pins need to idle high, it needs to know! See
+the source.

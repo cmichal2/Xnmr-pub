@@ -1,0 +1,20 @@
+# pulse_test.param
+#
+# This is a sample parameter file.
+# The parsing algorithm ignores all lines starting with the character '#'
+#
+# Parameter format is <name> <type> <default> <min> <max> <step> <page> [digits] \n
+#
+# All fields are mandatory.
+#
+# <name> is the name of the parameter (the same name as the pulse program variable)
+# <type> is either 'i' or 'f' for integer or float
+# [digits] can only be specified for floating point parameters
+#
+
+dummy_float f 5.7 0 100 0.05 1 3
+dummy_int i 10 0 100 1 5
+dummy_text t default
+dummy_double t 100e6
+
+# end of parameter file

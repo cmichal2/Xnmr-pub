@@ -1,0 +1,49 @@
+# Parameter file for single_p.c
+#
+# Parameter format is <name> <type> <default> <min> <max> <step> <page> [digits] \n
+#
+
+pulse_time f 100 0 10000 0.05 1 2
+trig_time f 1024 0 1e6 1 100 2
+post_trig_time f 7500 0  1e6 1 100 2
+PPO_time f 40000 0 1e20 10 1000 2
+recovery f 0 0 1e6 10 1000 2
+useless1 f 0 0 1e6 10 1000 2
+useless2 f 0 0 1e6 10 1000 2
+useless3 f 0 0 1e6 10 1000 2
+useless4 f 0 0 1e6 10 1000 2
+useless5 f 0 0 1e6 10 1000 2
+useless6 f 0 0 1e6 10 1000 2
+useless7 f 0 0 1e6 10 1000 2
+useless8 f 0 0 1e6 10 1000 2
+useless9 f 0 0 1e6 10 1000 2
+useless10 f 0 0 1e6 10 1000 2
+useless11 f 0 0 1e6 10 1000 2
+useless12 f 0 0 1e6 10 1000 2
+useless13 f 0 0 1e6 10 1000 2
+useless14 f 0 0 1e6 10 1000 2
+useless15 f 0 0 1e6 10 1000 2
+useless16 f 0 0 1e6 10 1000 2
+useless17 f 0 0 1e6 10 1000 2
+useless18 f 0 0 1e6 10 1000 2
+useless19 f 0 0 1e6 10 1000 2
+useless20 f 0 0 1e6 10 1000 2
+useless21 f 0 0 1e6 10 1000 2
+useless22 f 0 0 1e6 10 1000 2
+useless23 f 0 0 1e6 10 1000 2
+useless24 f 0 0 1e6 10 1000 2
+useless25 f 0 0 1e6 10 1000 2
+useless26 f 0 0 1e6 10 1000 2
+useless27 f 0 0 1e6 10 1000 2
+useless28 f 0 0 1e6 10 1000 2
+useless29 f 0 0 1e6 10 1000 2
+useless30 f 0 0 1e6 10 1000 2
+useless31 f 0 0 1e6 10 1000 2
+useless32 f 0 0 1e6 10 1000 2
+useless33 f 0 0 1e6 10 1000 2
+useless34 f 0 0 1e6 10 1000 2
+useless35 f 0 0 1e6 10 1000 2
+useless36 f 0 0 1e6 10 1000 2
+useless37 f 0 0 1e6 10 1000 2
+
+# end of parameter file

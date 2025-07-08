@@ -1,0 +1,4 @@
+#!/bin/bash
+ipcrm -M0x47
+ipcrm -M0x43
+ipcrm -Q0x49

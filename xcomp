@@ -1,0 +1,57 @@
+#!/bin/sh
+
+#CC=gcc3
+CC=gcc
+
+CFLAGS=" -Wall `pkg-config --cflags glib-2.0` -I/usr/share/Xnmr/include/"
+LDFLAGS=" -Wall `pkg-config --libs glib-2.0` -I/usr/share/Xnmr/include/"
+
+
+#check to see if our 'compiled' directory exists and is writable.  If not, abort
+if [ ! -d  compiled ] || [ ! -w compiled ] || [ ! -x compiled ]; then 
+    echo "compiled/ directory doesn't exist or isn't writable"
+    echo "This probably means your working directory isn't"
+    echo "the correct prog/ directory."
+    exit
+fi
+
+#check to see if the source file is .x ?
+#remove any trailing .c
+
+for i in $*; do
+    fname=`sed 's/\.c$//' -  <<EOF
+    $i
+EOF`
+#then remove any trailing .x
+    fname=`sed 's/\.x$//' -  <<EOF
+    $fname
+EOF`
+    
+#    echo "xcomp: got filename: $fname"
+    if [ -f $fname.x ]; then 
+	echo preprocessing $fname.x
+	Xnmr_preproc $fname.x
+	echo compiling $fname.x.c
+	$CC $CFLAGS -c $fname.x.c
+	R1=$?
+	$CC $LDFLAGS -o $fname $fname.x.o -lxnmr -lm 
+	R2=$?
+	if [ $R1 == 0 ] && [ $R2 == 0 ]; then
+	    echo compiling succeeded
+	    cp $fname.x compiled/
+	fi
+    else
+	echo compiling $fname.c 
+	$CC $CFLAGS -c $fname.c
+	R1=$?
+	$CC $LDFLAGS -o $fname $fname.o -lxnmr -lm 
+	R2=$?
+	if [ $R1 == 0 ] && [ $R2 == 0 ]; then
+	    echo compiling succeeded
+	    cp $fname.c compiled/
+	fi
+    fi
+    echo 
+done
+
+

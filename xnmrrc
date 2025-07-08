@@ -1,0 +1,33 @@
+style "cbutton"
+{
+bg[ACTIVE] = {1.0,0,0}
+#bg[PRELIGHT] = shade (1.02, @bg_color)
+}
+
+style "button2"
+{
+bg[ACTIVE] = {1.0,0,0}
+fg[ACTIVE] = {1.0,0,0}
+}
+
+style "mybigarrow"
+{
+GtkArrow::arrow-scaling = 0.9
+}
+style "mylittlearrow"
+{
+GtkArrow::arrow-scaling = 0.4
+}
+
+widget "*bigarrow*" style "mybigarrow"
+widget "*littlearrow*" style "mylittlearrow"
+
+widget "*mybutton*" style "cbutton"
+
+#widget_class "*GtkCheckButton*" style "button"
+#widget_class "*GtkToggleButton*" style "button"
+#widget_class "*GtkRadioButton*" style "button2"
+
+#widget_class "*GtkButton*" style "button"
+#widget_class "*GtkRadioButton*" style "button"
+

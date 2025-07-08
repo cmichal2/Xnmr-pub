@@ -1,0 +1,13 @@
+# Parameter file for one_pulse.c
+#
+# Parameter format is <name> <type> <default> <min> <max> <step> <page> [digits] \n
+#
+
+pulse_time f 100 0 10000 0.05 1 2
+pulse_padding f 1000 0 1000000 0.05 1 2
+trig_time f 1024 0 1e8 1 100 2
+post_trig_time f 7500 0  1e6 1 100 2
+PPO_time f 40000 0 1e20 10 1000 2
+recovery f 0 0 1e6 10 1000 2
+
+# end of parameter file

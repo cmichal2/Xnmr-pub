@@ -1,0 +1,53 @@
+# Makefile for Xnmr Project
+#
+# UBC Physics
+#doesn't build acq, only Xnmr
+GTK_CFL= -mms-bitfields -Ic:/Gtk/include/gtk-3.0 -Ic:/Gtk/include/cairo -Ic:/Gtk/include/pango-1.0 -Ic:/Gtk/include/atk-1.0 -Ic:/Gtk/include/cairo -Ic:/Gtk/include/pixman-1 -Ic:/Gtk/include -Ic:/Gtk/include/freetype2 -Ic:/Gtk/include -Ic:/Gtk/include/libpng15 -Ic:/Gtk/include/gdk-pixbuf-2.0 -Ic:/Gtk/include/libpng15 -Ic:/Gtk/include/glib-2.0 -Ic:/Gtk/lib/glib-2.0/include
+
+CC=gcc
+#MINGW:
+CFLAGS = -g  -O2   -Wall   -Wno-unused-result -DMINGW $(GTK_CFL) -DHAVE_STRUCT_TIMESPEC
+GTK_LFLAGS = -Lc:/Gtk/lib -lgtk-3 -lgdk-3 -lgdi32 -limm32 -lshell32 -lole32 -Wl,-luuid -lpangocairo-1.0 -lpangoft2-1.0 -lfreetype -lfontconfig -lpangowin32-1.0 -lgdi32 -lpango-1.0 -lm -latk-1.0 -lcairo-gobject -lcairo -lgdk_pixbuf-2.0 -lgio-2.0 -lgobject-2.0 -lglib-2.0 
+
+#CYGWIN
+#CFLAGS = -g  -O2   -Wall   -Wno-unused-result -DCYGWIN $(GTK_CFL)
+#GTK_LFLAGS = -Lc:/Gtk/lib -lgtk-3 -lgdk-3 -lgdi32 -limm32 -lshell32 -lole32 -Wl,-luuid -lpangocairo-1.0 -lpangoft2-1.0 -lfreetype -lfontconfig -lpangowin32-1.0 -lgdi32 -lpango-1.0 -lm -latk-1.0 -lcairo-gobject -lcairo -lgdk_pixbuf-2.0 -lgio-2.0 -lgobject-2.0 -lglib-2.0 -lintl
+
+all:   Xnmr.exe
+
+clean:
+	del *.o Xnmr.exe core
+
+Xnmr.exe: xnmr.o buff.o panel.o process_f.o param_f.o xnmr_ipc.o   param_utils.o four1.o
+	$(CC) -L.  xnmr.o buff.o  panel.o process_f.o param_f.o\
+ xnmr_ipc.o   param_utils.o four1.o -o Xnmr \
+$(GTK_LFLAGS) -lm -lport -lgfortran -lpthread -lwsock32
+
+
+xnmr.o: xnmr.c xnmr.h panel.h buff.h param_f.h xnmr_ipc.h p_signals.h
+	$(CC) $(CFLAGS) -c xnmr.c
+buff.o: buff.c xnmr.h buff.h param_f.h panel.h param_utils.h xnmr_ipc.h p_signals.h
+	$(CC) $(CFLAGS) -c buff.c
+four1.o: four1.c
+	$(CC) $(CFLAGS) -fPIC -c four1.c
+spline.o: spline.c
+	$(CC) $(CFLAGS) -c spline.c
+splint.o: splint.c
+	$(CC) $(CFLAGS) -c splint.c
+nrutil.o: nrutil.c
+	$(CC) $(CFLAGS) -c nrutil.c
+panel.o: panel.c panel.h process_f.h param_f.h xnmr_ipc.h shm_data.h buff.h p_signals.h xnmr.h
+	$(CC) $(CFLAGS) -c panel.c
+process_f.o: process_f.c process_f.h panel.h xnmr.h  buff.h param_utils.h 
+	$(CC) $(CFLAGS) -c process_f.c
+param_f.o: param_f.c param_f.h xnmr_ipc.h shm_data.h panel.h xnmr_ipc.h param_utils.h
+	$(CC) $(CFLAGS) -c param_f.c
+xnmr_ipc.o: xnmr_ipc.c xnmr_ipc.h shm_data.h p_signals.h process_f.h panel.h buff.h xnmr.h h_config.h param_f.h
+	$(CC) $(CFLAGS) -c xnmr_ipc.c
+pulse.o: pulse.c pulse.h h_config.h shm_data.h shm_prog.h p_signals.h param_utils.h
+	$(CC) -fPIC $(CFLAGS) -c pulse.c
+param_utils.o: param_utils.h param_utils.c shm_data.h
+	$(CC) -fPIC $(CFLAGS) -c param_utils.c
+
+
+

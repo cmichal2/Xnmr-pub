@@ -1,0 +1,111 @@
+June 2025
+	Implement DAC and ALT word support for Due pulse programmer
+
+May 2025
+	Start work on new variant with Due pulse programmer, AD9854
+	synth(s), and SDR (RX888-II or airspy R2) via soapy.
+	This variant called duesdr
+
+
+	new files:
+	Makefile-duesdr,
+	acq-duesdr.c,
+	acq-duesdr.h
+	Xnmr_preproc-duesdr.c,
+	h_config-duesdr.h,
+	pulse-duesdr.c,
+	pulse-duesdr.h,
+	shm_prog-duesdr.h
+	soapy-sdr.c
+	soapy-sdr.h
+
+	Variants:
+	-pp TTL pulse programmer, homebuild RX, AD6620 TX
+	-pb pulse blaster, AD9854 TX, AD6620 receiver with continuous streaming upgrade
+	-duepp due as pulse programmer, LimeSDR for TX/RX
+	-duesdr due as pulse programmer, airspy or RX888-II via soapy as RX
+
+
+	TODO
+	- startup - build program, make it all work to sync phases. need
+	hardware...
+	- filter modes: fft, boxcar, other?
+	- block size in noise mode, huh?
+	- pulse library - put back in ad9854 stuff...
+	- prep_sdr : find rx, get it started
+	- sync_rxtx -> run a program that sends a signal into the sdr,
+	capture it, set phase.
+
+
+Feb 2018
+
+	New variant: duepp in parallel with -pp (for my old pulse
+	programmer) and -pb (for pulseblaster. duepp uses Limesdr. Variant
+	should have been called Lime.
+
+	With gcc 6 trouble linking. libspinapi for pulseblaster and
+	libport need to be compiled with -fPIC.
+
+
+July 2016
+	Merge the pulseblaster and "mainline" versions so you build
+	regular with make, and pulseblaster version with make -f Makefile-pb
+	pulse programs in pb version now include pulse-pb.h
+
+	History of pulseblaster version was sort of hidden in this (woops)
+	but can be seen by checking out pulseblaster-arduino branch.
+
+
+April 30, 2014.
+	Imported project from cvs into git repository.
+	Imported with git cvsimport -r Oldbranches -d /usr2/src/cvsroot -C /usr/src/GIT XNMR Xnmr
+	The pulseblaster branch from cvs was made by diffing the two
+	branches and applying to a new pulseblaster branch in git.
+
+
+pp0.99.4 Aug 2004
+ - added add/subtract window (needs gtk+-2.4
+ - fix a bunch of possible crashes on closing the scales dialog
+ - and other dialogs when closing buffers or main shutdown.
+
+pp0.99.3
+- add noise spectroscopy flag and infrastructure in acq and pulse programing library.
+  If a pulse program indicates that it is a noise spectroscopy
+  sequence:
+  - acq will not upload data before restarting, rather it
+    will do the restart and then upload.
+  - The pulse program is not recalculated or redownloaded between
+    scans
+  - 2d mode will do block size, but will do dummy scans before starting
+    each new block
+  - The number of dummy scans will be done before
+    each increment in the 2d experiment.
+  - The pulse program isn't allowed to recalc every shot, only on 2d increments
+  - If the timing takes too long on 2d increments, that's ok.
+
+pp0.99.2
+- changed spectrum drawing to use gdk_draw_lines which draws
+  all the line segments in one call.  Much faster!
+- for Redhat 9 kernel 2.4.20 signals fixed - all posix now.
+- port to gtk+-2.0 - gsignal system, rewrote a few widget layouts (array popup & param frame)
+- tweaked a lot of dialog positionings (set_transient_for)
+- change parameter infrastructure from float to double, obsoleting double
+text type.  Text type does remain though.
+- fixed up float param formatting in param file and param string.
+- text params, and save name and ppname now update when they lose focus.
+- fix tiny bug in pp_recompile error handling.
+- lock shm's into memory.
+- fixed Xnmr and Xnmr/data directory creation mode
+- clean lots of little problems - closing buffer when array popup is showing
+  or press pending, or scales window open etc...
+- float and text parameters are recogized if one pp has text, the other double.
+Feb 20, 2003
+- added baseline spline routine
+- rationalize some of the drawing and colours
+
+pp0.99.1
+- major rewrite of pulse program generation - should be way more efficient.
+- going back in time now possible (store_position, jump_to_stored, return_to_present
+- other???
+
+

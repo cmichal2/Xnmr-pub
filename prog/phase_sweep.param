@@ -1,0 +1,15 @@
+# Parameter file for one_pulse.c
+#
+# Parameter format is <name> <type> <default> <min> <max> <step> <page> [digits] <units (for float)> \n
+# 
+
+dgain i 0 0 50 1 2
+sf1 t 55.8400
+sf1offset f 0 -1e6 1e6 1 1000 1 -
+sf2 t 55.586
+pw1 f 100 0 10000 0.05 1 2 u
+post_trig f 7.5 0  1e6 1 100 2 m
+PPO f 1024 0 1e20 10 1000 2 m
+rd f 10 0 1e6 10 1000 2 u
+
+# end of parameter file

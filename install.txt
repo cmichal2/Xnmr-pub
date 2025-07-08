@@ -1,0 +1,99 @@
+1) ensure necessary compilers and headers are installed.
+   specifically, need gtk+ headers, gcc, gfortran (or g77)
+
+2) install the port3 library:
+  tar -xvf port3.tar.gz
+  cd port3
+  make  (works if you're lucky, may need something like: F77=gfortran make -e
+  cp libport.a /usr/local/lib
+
+3) get the Xnmr sources: I'll put them at: 
+http://phas.ubc.ca/~michal/Xnmr.tar.gz
+
+become root: with su or sudo -i
+cd /usr/src/
+mkdir Xnmr
+cd Xnmr
+tar -xvf /path/to/xnmr.tar.gz
+cd current
+
+mkdir /usr/share/Xnmr
+mkdir /usr/share/Xnmr/config
+mkdir /usr/share/Xnmr/include
+mkdir /usr/share/Xnmr/filters
+
+ln -s /usr/src/Xnmr/current/xnmr_buff_icon.png /usr/share/Xnmr/
+ln -s /usr/src/Xnmr/current/p_signals.h /usr/share/Xnmr/include/
+ln -s /usr/src/Xnmr/current/param_utils.h /usr/share/Xnmr/include/
+ln -s /usr/src/Xnmr/current/shm_data.h /usr/share/Xnmr/include/
+ln -s /usr/src/Xnmr/current/pulse.h /usr/share/Xnmr/include/
+ln -s /usr/src/Xnmr/current/pulse-pb.h /usr/share/Xnmr/include/
+ln -s /usr/src/Xnmr/current/pulse-duelime.h /usr/share/Xnmr/include/
+ln -s /usr/src/Xnmr/current/pulse-duesdr.h /usr/share/Xnmr/include/
+ln -s /usr/src/Xnmr/current/h_config.h /usr/share/Xnmr/config/
+ln -s /usr/src/Xnmr/current/h_config-pb.h /usr/share/Xnmr/config/
+ln -s /usr/src/Xnmr/current/h_config-duelime.h /usr/share/Xnmr/config/
+ln -s /usr/src/Xnmr/current/h_config-duesdr.h /usr/share/Xnmr/config/
+ln -s /usr/src/Xnmr/current/pulse_hardware.h /usr/share/Xnmr/config/
+ln -s /usr/src/Xnmr/current/pulse_hardware-pb.h /usr/share/Xnmr/config/
+ln -s /usr/src/Xnmr/current/pulse_hardware-duelime.h /usr/share/Xnmr/config/
+ln -s /usr/src/Xnmr/current/pulse_hardware-duesdr.h /usr/share/Xnmr/config/
+ln -s /usr/src/Xnmr/current/xnmrrc /usr/share/Xnmr/config/
+
+4) at the top of acq.c, for an installation that will never run hardware, make sure that:
+    #define NOHARDWARE is not commented out
+    //#define OLD_PORT_INTERRUPT and
+    //#define RTAI_INTERRUPT are both commented out
+    #define NO_RT_SCHED should not be commented out.
+
+make -f Makefile-duelime (or Makefile-pp or Makefile-pb or Makefile-duesdr)
+
+ln -s /usr/src/Xnmr/current/xcomp /usr/local/bin/xcomp
+ln -s /usr/src/Xnmr/current/Xnmr /usr/local/bin/Xnmr
+ln -s /usr/src/Xnmr/current/acq /usr/local/bin/acq
+ln -s /usr/src/Xnmr/current/Xnmr_preproc /usr/local/bin/Xnmr_preproc
+ln -s /usr/src/Xnmr/current/libxnmr.so /usr/local/lib/libxnmr.so
+/sbin/ldconfig
+
+
+5) when you start Xnmr for the first time, it will create a directory
+   called: Xnmr in your home directory.  Under Xnmr, you should create
+   (if it doesn't exist) a directory called prog Into that directory,
+   copy: generic_2d and generic 2d.param from /usr/src/Xnmr/current/prog
+
+
+
+
+To talk to hardware, you need linux. The gui has been build on windows
+and MacOS too, though not for a long time.
+
+MACOS:
+use Makefile-mac
+use macports to install gtk3, gcc48 (or newer - but update the makefile)
+
+Should work easily.
+
+WINDOWS:
+1) install gtk3 all-in-one bundle
+2) to build on windows, install mingw, add posix thread option.
+3) mingw32-make -f Makefile-win
+
+
+
+---------------
+For real-time stuff that matters, try setting some vm settings at boot time to reduce latency.
+
+echo 20  > /proc/sys/vm/dirty_ratio
+echo 1 > /proc/sys/vm/dirty_background_ratio
+echo 500 > /proc/sys/vm/dirty_expire_centisecs
+echo 300 > /proc/sys/vm/dirty_writeback_centisecs
+
+VERSIONS!
+Makefile-pp Homebuilt pulse programmer for 360 with AD dsp receiver
+
+Makefile-pb pulseblaster pulse programmer for 200 with AD dsp
+receiver, modified for continuous stream through due port adapter
+
+Makefile-duepp Due pulse programmer with LimeSDR
+
+Makefile-duesdr 
