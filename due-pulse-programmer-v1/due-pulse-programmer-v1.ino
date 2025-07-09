@@ -1,3 +1,21 @@
+/*
+
+Copyright (c) 2025 Carl Michal
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free
+Software Foundation, either version 3 of the License, or (at your
+option) any later version.
+
+Xnmr is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU General Public License
+along with Xnmr. If not, see <https://www.gnu.org/licenses/>.
+
+*/
 /* current pin assignments: (arduino pin numbers are D11 D12, SAM3X ports are D.7, D.8, C.1 etc)
     - output latch pin is D11 = D.7
     - timer trigger input is D12 = D.8 - a rising edge starts the timer at start of sequence
