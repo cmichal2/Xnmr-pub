@@ -58,7 +58,7 @@ reload wrapper                             (from end of acquisition)
 
 */
 
-#define HAVE_NR_SPLINE
+//#define HAVE_NR_SPLINE
 
 #define _GNU_SOURCE
 #include <unistd.h>
